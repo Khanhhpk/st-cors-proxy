@@ -3,45 +3,46 @@
 
     /**
      * Dùng jQuery.ajax thay cho fetch để SillyTavern tự động lo liệu vụ X-CSRF-Token
-     * (SillyTavern đã cấu hình sẵn $.ajaxSetup ở core main.js)
      */
     async function fetchWithoutCors(targetUrl, fetchOptions = {}) {
         const proxyUrl = `/api/plugins/${EXTENSION_NAME}/proxy`;
         
-        return new Promise((resolve, reject) => {
-            $.ajax({
+        let responseText = '';
+        let status = 500;
+        let ok = false;
+
+        try {
+            const data = await $.ajax({
                 url: proxyUrl,
                 type: 'POST',
                 data: JSON.stringify({
                     url: targetUrl,
                     options: fetchOptions
                 }),
-                contentType: 'application/json',
-                success: function(data, textStatus, jqXHR) {
-                    // Nếu response là JSON, jQuery sẽ tự parse thành object. Ta ép kiểu lại cho giống chuẩn fetch.
-                    const responseText = typeof data === 'string' ? data : JSON.stringify(data);
-                    resolve({
-                        ok: true,
-                        status: jqXHR.status,
-                        text: async () => responseText,
-                        json: async () => typeof data === 'string' ? JSON.parse(data) : data
-                    });
-                },
-                error: function(jqXHR, textStatus, errorThrown) {
-                    resolve({
-                        ok: false,
-                        status: jqXHR.status,
-                        text: async () => jqXHR.responseText || errorThrown,
-                        json: async () => {
-                            try { return JSON.parse(jqXHR.responseText); } catch(e) { return {}; }
-                        }
-                    });
-                }
+                contentType: 'application/json'
             });
-        });
+            
+            // Thành công (200 OK)
+            responseText = typeof data === 'string' ? data : JSON.stringify(data);
+            status = 200;
+            ok = true;
+        } catch (jqXHR) {
+            // Thất bại (403, 404, 500...)
+            responseText = jqXHR.responseText || jqXHR.statusText || 'Unknown Error';
+            status = jqXHR.status || 500;
+            ok = false;
+        }
+
+        return {
+            ok: ok,
+            status: status,
+            text: async () => responseText,
+            json: async () => {
+                try { return JSON.parse(responseText); } catch(e) { return {}; }
+            }
+        };
     }
 
-    // Gắn vào window để các extension khác gọi thoải mái
     window.fetchWithoutCors = fetchWithoutCors;
 
     async function initUI() {
@@ -100,28 +101,28 @@
             const proxyIframe = $('#st-cors-proxy-iframe');
             const proxyRawOutput = $('#st-cors-proxy-raw');
 
-            // Ping server
+            // Ping server một cách an toàn nhất
+            let checkStatus = 500;
             try {
-                const checkRes = await new Promise((resolve) => {
-                    $.ajax({
-                        url: `/api/plugins/${EXTENSION_NAME}/proxy`,
-                        type: 'POST',
-                        data: JSON.stringify({ url: '' }),
-                        contentType: 'application/json',
-                        success: (d, t, jqXHR) => resolve(jqXHR),
-                        error: (jqXHR) => resolve(jqXHR)
-                    });
+                await $.ajax({
+                    url: `/api/plugins/${EXTENSION_NAME}/proxy`,
+                    type: 'POST',
+                    data: JSON.stringify({ url: '' }),
+                    contentType: 'application/json'
                 });
-                
-                if (checkRes.status === 400 || (checkRes.status >= 200 && checkRes.status < 300)) {
-                    proxyStatus.text('✅ Đang hoạt động (Server Proxy OK)').css('color', 'lightgreen');
-                } else if (checkRes.status === 403) {
-                    proxyStatus.text(`❌ Lỗi 403 (Thiếu quyền/CSRF)`).css('color', 'red');
-                } else {
-                    proxyStatus.text(`❌ Lỗi kết nối (${checkRes.status})`).css('color', 'red');
-                }
-            } catch (err) {
-                proxyStatus.text(`❌ Không tìm thấy Server (Bạn đã Restart chưa?)`).css('color', 'red');
+                checkStatus = 200;
+            } catch (jqXHR) {
+                checkStatus = jqXHR.status || 500;
+            }
+
+            if (checkStatus === 400 || (checkStatus >= 200 && checkStatus < 300)) {
+                proxyStatus.text('✅ Đang hoạt động (Server Proxy OK)').css('color', 'lightgreen');
+            } else if (checkStatus === 403) {
+                proxyStatus.text(`❌ Lỗi 403 (Thiếu quyền/CSRF)`).css('color', 'red');
+            } else if (checkStatus === 404) {
+                proxyStatus.text(`❌ Lỗi 404 (Chưa nhận diện được Backend. HÃY RESTART LẠI SILLYTAVERN!)`).css('color', 'red');
+            } else {
+                proxyStatus.text(`❌ Lỗi kết nối (${checkStatus})`).css('color', 'red');
             }
 
             proxyBtn.on('click', async () => {
