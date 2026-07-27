@@ -1,14 +1,21 @@
 (function () {
     const EXTENSION_NAME = 'st-cors-proxy';
 
+    // Lấy Headers an toàn (bao gồm CSRF token của SillyTavern)
+    function getSafeHeaders() {
+        let headers = { 'Content-Type': 'application/json' };
+        if (typeof getRequestHeaders === 'function') {
+            Object.assign(headers, getRequestHeaders()); // Tự động chèn X-CSRF-Token
+        }
+        return headers;
+    }
+
     async function fetchWithoutCors(targetUrl, fetchOptions = {}) {
         const proxyUrl = `/api/plugins/${EXTENSION_NAME}/proxy`;
         
         const response = await fetch(proxyUrl, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: getSafeHeaders(),
             body: JSON.stringify({
                 url: targetUrl,
                 options: fetchOptions
@@ -35,10 +42,8 @@
                 return;
             }
 
-            // Tránh duplicate
             if (document.getElementById('st-cors-proxy-settings')) return;
 
-            // Chèn trực tiếp HTML thay vì dùng $.get để tránh lỗi đường dẫn
             const uiHtml = `
             <div class="extension_settings" id="st-cors-proxy-settings">
                 <div class="inline-drawer">
@@ -89,12 +94,14 @@
             try {
                 const checkRes = await fetch(`/api/plugins/${EXTENSION_NAME}/proxy`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: getSafeHeaders(),
                     body: JSON.stringify({ url: '' })
                 });
                 
                 if (checkRes.status === 400 || checkRes.ok) {
                     proxyStatus.text('✅ Đang hoạt động (Server Proxy OK)').css('color', 'lightgreen');
+                } else if (checkRes.status === 403) {
+                    proxyStatus.text(`❌ Lỗi 403 (Thiếu quyền/CSRF)`).css('color', 'red');
                 } else {
                     proxyStatus.text(`❌ Lỗi kết nối (${checkRes.status})`).css('color', 'red');
                 }
