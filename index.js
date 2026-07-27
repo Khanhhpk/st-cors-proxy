@@ -150,6 +150,13 @@
                 }
             });
 
+            // Tự động lưu khi nhấn Enter trong ô input
+            settingsInput.on('keypress', (e) => {
+                if (e.which === 13) {
+                    saveBtn.click();
+                }
+            });
+
             saveBtn.on('click', () => {
                 let val = settingsInput.val().trim();
                 if (!val) {
