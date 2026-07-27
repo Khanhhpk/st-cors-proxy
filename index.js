@@ -95,16 +95,22 @@
                         
                         <div style="font-weight: bold; margin-bottom: 5px;">⚙️ Máy chủ Proxy (CORS Proxy URL)</div>
                         <p style="font-size: 0.8em; opacity: 0.8; margin-bottom: 5px;">
-                            ⚠️ <b>Lưu ý:</b> <code>corsproxy.io</code> (Mặc định) giới hạn <b>60 request/phút, 10.000 req/tháng</b> và CHỈ tải được Text/JSON. Nếu cần tải Ảnh/Âm thanh, hãy chọn nguồn khác.
+                            ⚠️ <b>Lưu ý:</b> <code>corsproxy.io</code> giới hạn <b>60 request/phút</b> và CHỈ tải được Text/JSON. Nếu cần tải Ảnh/Âm thanh, hãy chọn nguồn khác.
                         </p>
-                        <div class="flex-container margin-bot-10px" style="gap: 5px; flex-wrap: wrap;">
-                            <div id="st-tauri-cors-preset-1" class="menu_button" style="font-size: 0.75em; padding: 5px 10px; flex: 1; text-align: center;">corsproxy.io (Mặc định)</div>
-                            <div id="st-tauri-cors-preset-2" class="menu_button" style="font-size: 0.75em; padding: 5px 10px; flex: 1; text-align: center;">AllOrigins (Hỗ trợ Media)</div>
-                            <div id="st-tauri-cors-preset-3" class="menu_button" style="font-size: 0.75em; padding: 5px 10px; flex: 1; text-align: center;">CORS Anywhere</div>
-                        </div>
-                        <div class="flex-container margin-bot-10px">
-                            <input type="text" id="st-tauri-cors-settings-url" class="text_pole" style="flex: 1;" value="${currentProxy}">
-                            <div id="st-tauri-cors-save-btn" class="menu_button">Lưu Cấu Hình</div>
+                        
+                        <div class="flex-container margin-bot-10px" style="gap: 5px; flex-direction: column;">
+                            <select id="st-tauri-cors-preset-select" class="text_pole" style="width: 100%; padding: 5px; cursor: pointer;">
+                                <option value="">-- Chọn Proxy cài sẵn (Mì ăn liền) --</option>
+                                <option value="https://corsproxy.io/?">corsproxy.io (Mặc định - Chỉ Text)</option>
+                                <option value="https://api.allorigins.win/raw?url=">AllOrigins (Ngon - Hỗ trợ Media)</option>
+                                <option value="https://cors-anywhere.com/">cors-anywhere.com (Cộng đồng)</option>
+                                <option value="https://cors-anywhere.herokuapp.com/">cors-anywhere.herokuapp (Cần Unlock)</option>
+                            </select>
+                            
+                            <div class="flex-container" style="gap: 5px;">
+                                <input type="text" id="st-tauri-cors-settings-url" class="text_pole" style="flex: 1;" value="${currentProxy}" placeholder="Hoặc nhập Proxy tùy chỉnh...">
+                                <div id="st-tauri-cors-save-btn" class="menu_button" style="white-space: nowrap;">Lưu Cấu Hình</div>
+                            </div>
                         </div>
 
                         <hr style="border-color: rgba(255,255,255,0.1); margin: 15px 0;">
@@ -128,13 +134,17 @@
             // Save Settings
             const saveBtn = $('#st-tauri-cors-save-btn');
             const settingsInput = $('#st-tauri-cors-settings-url');
-            // Preset Buttons
-            $('#st-tauri-cors-preset-1').on('click', () => settingsInput.val('https://corsproxy.io/?'));
-            $('#st-tauri-cors-preset-2').on('click', () => settingsInput.val('https://api.allorigins.win/raw?url='));
-            $('#st-tauri-cors-preset-3').on('click', () => {
-                settingsInput.val('https://cors-anywhere.herokuapp.com/');
-                if (confirm("Lưu ý: cors-anywhere yêu cầu bạn phải được cấp quyền (Unlock) trước khi dùng.\n\nBạn có muốn mở trang web lấy quyền (corsdemo) ngay bây giờ không?")) {
-                    window.open('https://cors-anywhere.herokuapp.com/corsdemo', '_blank');
+            
+            // Preset Select
+            $('#st-tauri-cors-preset-select').on('change', function() {
+                const val = $(this).val();
+                if (val) {
+                    settingsInput.val(val);
+                    if (val === 'https://cors-anywhere.herokuapp.com/') {
+                        if (confirm("Lưu ý: Máy chủ này yêu cầu bạn phải được cấp quyền (Unlock) trước khi dùng.\n\nBạn có muốn mở trang web lấy quyền (corsdemo) ngay bây giờ không?")) {
+                            window.open('https://cors-anywhere.herokuapp.com/corsdemo', '_blank');
+                        }
+                    }
                 }
             });
 
