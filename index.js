@@ -84,16 +84,13 @@
                                 🚨 CHÚ Ý: Mở file config.yaml và đảm bảo dòng "enableServerPlugins: true"
                             </p>
 
-                            <!-- KHUNG COPY THỦ CÔNG (ẨN, chỉ hiện khi Auto Install thất bại) -->
-                            <div id="st-cors-proxy-manual-cmd" style="display: none; margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 10px;">
-                                <p style="font-size: 0.85em; color: #fca5a5; margin-bottom: 5px;">Tự động cài đặt thất bại! Hãy copy lệnh dưới đây dán vào CMD/Termux và gõ Enter để tự di chuyển file:</p>
-                                <div style="background: rgba(0,0,0,0.5); padding: 8px; border-radius: 5px; font-family: monospace; color: #34d399; font-size: 0.85em; display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-                                    <span id="st-cors-proxy-cmd-text">cp -r data/*/extensions/st-cors-proxy plugins/ 2>/dev/null || cp -r public/scripts/extensions/st-cors-proxy plugins/</span>
-                                    <button id="st-cors-proxy-copy-cmd" style="background: #38bdf8; color: black; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-weight: bold;">COPY</button>
+                            <!-- KHUNG COPY THỦ CÔNG (Dành cho Termux/Linux) -->
+                            <div id="st-cors-proxy-manual-cmd" style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 10px;">
+                                <p style="font-size: 0.85em; color: #fca5a5; margin-bottom: 5px;">Nếu cài đặt 1-Click thất bại hoặc bạn đang dùng Termux, chỉ cần COPY 1 lệnh duy nhất dưới đây và dán vào Termux rồi Enter (Nó sẽ tự cài file và tự bật cấu hình cho bạn):</p>
+                                <div style="background: rgba(0,0,0,0.5); padding: 8px; border-radius: 5px; font-family: monospace; color: #34d399; font-size: 0.8em; display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; word-break: break-all;">
+                                    <span id="st-cors-proxy-cmd-text">cp -r data/*/extensions/st-cors-proxy plugins/ 2>/dev/null || cp -r public/scripts/extensions/st-cors-proxy plugins/ 2>/dev/null; sed -i -E 's/enableServerPlugins:[[:space:]]*false/enableServerPlugins: true/g' config.yaml</span>
+                                    <button id="st-cors-proxy-copy-cmd" style="background: #38bdf8; color: black; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-left: 10px; flex-shrink: 0;">COPY</button>
                                 </div>
-                                <p style="font-size: 0.8em; color: #cbd5e1; margin-top: 5px; line-height: 1.4;">
-                                    <b>BƯỚC BẮT BUỘC:</b> Bạn PHẢI mở file <b>config.yaml</b> của SillyTavern, tìm dòng <code>enableServerPlugins</code> và đổi thành <code>true</code>. Sau đó Restart ST.
-                                </p>
                             </div>
                         </div>
 
