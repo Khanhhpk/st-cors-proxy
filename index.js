@@ -1,51 +1,47 @@
 (function () {
     const EXTENSION_NAME = 'st-cors-proxy';
 
-    // Lấy Headers an toàn (bao gồm CSRF token của SillyTavern) cực kỳ cẩn thận
-    function getSafeHeaders() {
-        let headers = { 'Content-Type': 'application/json' };
-        
-        // Cách 1: Ưu tiên lấy từ thẻ meta (Cách chuẩn nhất mà ST hay dùng)
-        const csrfMeta = document.querySelector('meta[name="csrf-token"]');
-        if (csrfMeta) {
-            headers['X-CSRF-Token'] = csrfMeta.getAttribute('content');
-        } 
-        // Cách 2: Lấy từ biến global của window
-        else if (window['X-CSRF-Token']) {
-            headers['X-CSRF-Token'] = window['X-CSRF-Token'];
-        }
-        
-        // Cách 3: Gộp thêm các header chuẩn của ST (đè lên nếu có)
-        if (typeof getRequestHeaders === 'function') {
-            Object.assign(headers, getRequestHeaders());
-        }
-        
-        return headers;
-    }
-
+    /**
+     * Dùng jQuery.ajax thay cho fetch để SillyTavern tự động lo liệu vụ X-CSRF-Token
+     * (SillyTavern đã cấu hình sẵn $.ajaxSetup ở core main.js)
+     */
     async function fetchWithoutCors(targetUrl, fetchOptions = {}) {
         const proxyUrl = `/api/plugins/${EXTENSION_NAME}/proxy`;
         
-        const response = await fetch(proxyUrl, {
-            method: 'POST',
-            headers: getSafeHeaders(),
-            credentials: 'same-origin', // BẮT BUỘC để gửi kèm cookie CSRF của ST
-            body: JSON.stringify({
-                url: targetUrl,
-                options: fetchOptions
-            })
+        return new Promise((resolve, reject) => {
+            $.ajax({
+                url: proxyUrl,
+                type: 'POST',
+                data: JSON.stringify({
+                    url: targetUrl,
+                    options: fetchOptions
+                }),
+                contentType: 'application/json',
+                success: function(data, textStatus, jqXHR) {
+                    // Nếu response là JSON, jQuery sẽ tự parse thành object. Ta ép kiểu lại cho giống chuẩn fetch.
+                    const responseText = typeof data === 'string' ? data : JSON.stringify(data);
+                    resolve({
+                        ok: true,
+                        status: jqXHR.status,
+                        text: async () => responseText,
+                        json: async () => typeof data === 'string' ? JSON.parse(data) : data
+                    });
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    resolve({
+                        ok: false,
+                        status: jqXHR.status,
+                        text: async () => jqXHR.responseText || errorThrown,
+                        json: async () => {
+                            try { return JSON.parse(jqXHR.responseText); } catch(e) { return {}; }
+                        }
+                    });
+                }
+            });
         });
-        
-        const responseText = await response.text();
-        
-        return {
-            ok: response.ok,
-            status: response.status,
-            text: async () => responseText,
-            json: async () => JSON.parse(responseText)
-        };
     }
 
+    // Gắn vào window để các extension khác gọi thoải mái
     window.fetchWithoutCors = fetchWithoutCors;
 
     async function initUI() {
@@ -106,14 +102,18 @@
 
             // Ping server
             try {
-                const checkRes = await fetch(`/api/plugins/${EXTENSION_NAME}/proxy`, {
-                    method: 'POST',
-                    headers: getSafeHeaders(),
-                    credentials: 'same-origin', // BẮT BUỘC để gửi kèm cookie CSRF của ST
-                    body: JSON.stringify({ url: '' })
+                const checkRes = await new Promise((resolve) => {
+                    $.ajax({
+                        url: `/api/plugins/${EXTENSION_NAME}/proxy`,
+                        type: 'POST',
+                        data: JSON.stringify({ url: '' }),
+                        contentType: 'application/json',
+                        success: (d, t, jqXHR) => resolve(jqXHR),
+                        error: (jqXHR) => resolve(jqXHR)
+                    });
                 });
                 
-                if (checkRes.status === 400 || checkRes.ok) {
+                if (checkRes.status === 400 || (checkRes.status >= 200 && checkRes.status < 300)) {
                     proxyStatus.text('✅ Đang hoạt động (Server Proxy OK)').css('color', 'lightgreen');
                 } else if (checkRes.status === 403) {
                     proxyStatus.text(`❌ Lỗi 403 (Thiếu quyền/CSRF)`).css('color', 'red');
