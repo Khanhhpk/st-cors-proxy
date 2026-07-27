@@ -1,0 +1,10 @@
+{
+    "display_name": "ST CORS Proxy",
+    "loading_order": 1,
+    "js": "index.js",
+    "requires": [],
+    "optional": [],
+    "version": "1.0.0",
+    "author": "Kaiz",
+    "description": "An internal proxy that bypasses CORS using SillyTavern's backend Node.js. (Mobile/Termux friendly)"
+}
