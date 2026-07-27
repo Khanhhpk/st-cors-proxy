@@ -133,7 +133,9 @@
             $('#st-tauri-cors-preset-2').on('click', () => settingsInput.val('https://api.allorigins.win/raw?url='));
             $('#st-tauri-cors-preset-3').on('click', () => {
                 settingsInput.val('https://cors-anywhere.herokuapp.com/');
-                alert("Lưu ý: cors-anywhere yêu cầu bạn phải dùng trình duyệt mở trang web https://cors-anywhere.herokuapp.com/corsdemo và click nút 'Request temporary access' thì mới dùng được nhé!");
+                if (confirm("Lưu ý: cors-anywhere yêu cầu bạn phải được cấp quyền (Unlock) trước khi dùng.\n\nBạn có muốn mở trang web lấy quyền (corsdemo) ngay bây giờ không?")) {
+                    window.open('https://cors-anywhere.herokuapp.com/corsdemo', '_blank');
+                }
             });
 
             saveBtn.on('click', () => {
