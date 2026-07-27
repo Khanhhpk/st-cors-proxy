@@ -37,6 +37,17 @@ class CorsBypassPlugin {
     }
 }
 
-module.exports = function(core) {
-    return new CorsBypassPlugin(core).router;
+const pluginInstance = new CorsBypassPlugin();
+
+module.exports = {
+    info: {
+        id: 'st-cors-proxy',
+        name: 'ST CORS Proxy',
+        description: 'Internal proxy to bypass CORS',
+        version: '1.0.0',
+        author: 'Kaiz'
+    },
+    init: function(router, core) {
+        router.use('/', pluginInstance.router);
+    }
 };

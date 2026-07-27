@@ -1,4 +1,6 @@
 (function () {
+    if (typeof window === 'undefined') return; // Tránh lỗi khi Backend ST vô tình load file này
+
     const EXTENSION_NAME = 'st-cors-proxy';
 
     async function fetchWithoutCors(targetUrl, fetchOptions = {}) {
