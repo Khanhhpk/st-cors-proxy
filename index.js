@@ -94,7 +94,14 @@
                         <hr style="border-color: rgba(255,255,255,0.1); margin: 15px 0;">
                         
                         <div style="font-weight: bold; margin-bottom: 5px;">⚙️ Máy chủ Proxy (CORS Proxy URL)</div>
-                        <p style="font-size: 0.8em; opacity: 0.8; margin-bottom: 5px;">Mặc định là <code>https://corsproxy.io/?</code>. Bạn có thể đổi sang proxy khác nếu bị lỗi (vd: Cloudflare Worker của riêng bạn).</p>
+                        <p style="font-size: 0.8em; opacity: 0.8; margin-bottom: 5px;">
+                            ⚠️ <b>Lưu ý:</b> <code>corsproxy.io</code> (Mặc định) giới hạn <b>60 request/phút, 10.000 req/tháng</b> và CHỈ tải được Text/JSON. Nếu cần tải Ảnh/Âm thanh, hãy chọn nguồn khác.
+                        </p>
+                        <div class="flex-container margin-bot-10px" style="gap: 5px; flex-wrap: wrap;">
+                            <div id="st-tauri-cors-preset-1" class="menu_button" style="font-size: 0.75em; padding: 5px 10px; flex: 1; text-align: center;">corsproxy.io (Mặc định)</div>
+                            <div id="st-tauri-cors-preset-2" class="menu_button" style="font-size: 0.75em; padding: 5px 10px; flex: 1; text-align: center;">AllOrigins (Hỗ trợ Media)</div>
+                            <div id="st-tauri-cors-preset-3" class="menu_button" style="font-size: 0.75em; padding: 5px 10px; flex: 1; text-align: center;">CORS Anywhere</div>
+                        </div>
                         <div class="flex-container margin-bot-10px">
                             <input type="text" id="st-tauri-cors-settings-url" class="text_pole" style="flex: 1;" value="${currentProxy}">
                             <div id="st-tauri-cors-save-btn" class="menu_button">Lưu Cấu Hình</div>
@@ -121,6 +128,14 @@
             // Save Settings
             const saveBtn = $('#st-tauri-cors-save-btn');
             const settingsInput = $('#st-tauri-cors-settings-url');
+            // Preset Buttons
+            $('#st-tauri-cors-preset-1').on('click', () => settingsInput.val('https://corsproxy.io/?'));
+            $('#st-tauri-cors-preset-2').on('click', () => settingsInput.val('https://api.allorigins.win/raw?url='));
+            $('#st-tauri-cors-preset-3').on('click', () => {
+                settingsInput.val('https://cors-anywhere.herokuapp.com/');
+                alert("Lưu ý: cors-anywhere yêu cầu bạn phải dùng trình duyệt mở trang web https://cors-anywhere.herokuapp.com/corsdemo và click nút 'Request temporary access' thì mới dùng được nhé!");
+            });
+
             saveBtn.on('click', () => {
                 let val = settingsInput.val().trim();
                 if (!val) {
