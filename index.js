@@ -1,12 +1,25 @@
 (function () {
     const EXTENSION_NAME = 'st-cors-proxy';
 
-    // Lấy Headers an toàn (bao gồm CSRF token của SillyTavern)
+    // Lấy Headers an toàn (bao gồm CSRF token của SillyTavern) cực kỳ cẩn thận
     function getSafeHeaders() {
         let headers = { 'Content-Type': 'application/json' };
-        if (typeof getRequestHeaders === 'function') {
-            Object.assign(headers, getRequestHeaders()); // Tự động chèn X-CSRF-Token
+        
+        // Cách 1: Ưu tiên lấy từ thẻ meta (Cách chuẩn nhất mà ST hay dùng)
+        const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+        if (csrfMeta) {
+            headers['X-CSRF-Token'] = csrfMeta.getAttribute('content');
+        } 
+        // Cách 2: Lấy từ biến global của window
+        else if (window['X-CSRF-Token']) {
+            headers['X-CSRF-Token'] = window['X-CSRF-Token'];
         }
+        
+        // Cách 3: Gộp thêm các header chuẩn của ST (đè lên nếu có)
+        if (typeof getRequestHeaders === 'function') {
+            Object.assign(headers, getRequestHeaders());
+        }
+        
         return headers;
     }
 
@@ -16,6 +29,7 @@
         const response = await fetch(proxyUrl, {
             method: 'POST',
             headers: getSafeHeaders(),
+            credentials: 'same-origin', // BẮT BUỘC để gửi kèm cookie CSRF của ST
             body: JSON.stringify({
                 url: targetUrl,
                 options: fetchOptions
@@ -95,6 +109,7 @@
                 const checkRes = await fetch(`/api/plugins/${EXTENSION_NAME}/proxy`, {
                     method: 'POST',
                     headers: getSafeHeaders(),
+                    credentials: 'same-origin', // BẮT BUỘC để gửi kèm cookie CSRF của ST
                     body: JSON.stringify({ url: '' })
                 });
                 
