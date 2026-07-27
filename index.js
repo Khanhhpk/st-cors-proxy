@@ -140,7 +140,7 @@
                         
                         <div style="font-weight: bold; margin-bottom: 5px;">⚙️ Máy chủ Proxy (CORS Proxy URL)</div>
                         <p style="font-size: 0.8em; opacity: 0.8; margin-bottom: 5px;">
-                            ⚠️ <b>Lưu ý:</b> <code>corsproxy.io</code> giới hạn <b>60 request/phút</b> và CHỈ tải được Text/JSON. Nếu cần tải Ảnh/Âm thanh, hãy chọn nguồn khác.
+                            ⚠️ <b>Lưu ý:</b> Các Proxy miễn phí như <code>corsproxy.io</code> có giới hạn (ví dụ: <b>60 request/phút</b>).
                         </p>
                         
                         <div class="flex-container margin-bot-10px" style="gap: 5px; flex-direction: column;">
