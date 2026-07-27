@@ -145,6 +145,8 @@
                             window.open('https://cors-anywhere.herokuapp.com/corsdemo', '_blank');
                         }
                     }
+                    // Tự động lưu luôn để người dùng đỡ phải bấm 2 lần
+                    saveBtn.click();
                 }
             });
 
