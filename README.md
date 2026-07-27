@@ -1,16 +1,17 @@
-# ST Tauri CORS Bypass
+# ST Universal CORS Bypass
 
-**A specialized frontend extension for SillyTavern designed exclusively for Tauri Tavern.**
+**A universal, 100% client-side frontend extension for SillyTavern and TauriTavern that bypasses CORS restrictions globally.**
 
-This extension monkey-patches the global `window.fetch` function to seamlessly route all external API requests through Tauri's native Rust HTTP client (`window.__TAURI__.http`). 
+This extension monkey-patches the global `window.fetch` function to seamlessly route all external API requests through a public CORS Proxy (defaulting to `corsproxy.io`). 
 
-By intercepting requests at the frontend layer and utilizing Tauri's native capabilities, this extension completely bypasses browser CORS restrictions without requiring any Node.js backend modifications, server plugins, or `config.yaml` edits.
+Because it operates entirely on the frontend by manipulating Javascript's fetch API, it requires **zero Backend installation** and works flawlessly across **all platforms**, including TauriTavern, PC Browsers, Termux (Android), and iOS Safari.
 
 ## Features
-- **100% Client-Side:** No server plugin installation required.
-- **Global Interception:** Automatically intercepts and proxies any `fetch` calls made by SillyTavern or other extensions.
-- **Zero Configuration:** Just install and reload. It works silently in the background.
-- **Localhost Safe:** Automatically ignores internal API calls (localhost / 127.0.0.1) to ensure optimal performance.
+- **Universal Compatibility:** Works on standard SillyTavern and TauriTavern.
+- **100% Client-Side:** No Node.js server plugin installation required. No need to edit `config.yaml`.
+- **Global Interception:** Automatically intercepts and proxies any `fetch` calls made by SillyTavern or other extensions (e.g., fetching TTS audio, Wiki text, or external images).
+- **Customizable Proxy Server:** Don't want to use `corsproxy.io`? You can easily change the proxy server URL in the extension settings to use your own Cloudflare Worker or alternative proxies like `allorigins.win`.
+- **Localhost Safe:** Automatically ignores internal API calls (localhost / 127.0.0.1) to ensure optimal performance and security for your local LLM connections.
 
 ## Installation
 1. Open SillyTavern and navigate to the **Extensions** menu (the puzzle piece icon).
@@ -18,8 +19,11 @@ By intercepting requests at the frontend layer and utilizing Tauri's native capa
    `https://github.com/Khanhhpk/st-cors-proxy`
 3. Reload SillyTavern.
 
-## How it works
-When installed in Tauri Tavern, the extension detects the presence of `window.__TAURI__.http.fetch`. It overwrites the standard browser `fetch` API. Any outgoing request to an external domain is caught, translated into Tauri's fetch format, sent via the Rust backend (which ignores CORS), and repackaged back into a standard Web API `Response` object for SillyTavern to consume transparently.
+## Configuration & Usage
+Once installed, open the **Extensions** menu and look for **ST Universal CORS Bypass**.
+- You will see a green status indicating that the monkey-patch is active.
+- **Proxy Server:** You can change the default `https://corsproxy.io/?` to any other CORS proxy service. Just paste the new URL and hit "Save".
+- **Test Fetch:** You can paste any CORS-blocked URL (e.g. `https://example.com`) and click Test. The extension will automatically route it through your chosen proxy and display the result.
 
-## Requirements
-- **Tauri Tavern**: This extension will **NOT** work on standard web browsers (Chrome, Firefox, Safari) or Termux because they lack the `window.__TAURI__` environment. If you are using a standard browser, please use a browser-based CORS extension (like "Allow CORS: Access-Control-Allow-Origin") or Quetta browser.
+## Important Privacy Note
+Since this extension routes external requests through a public proxy server, you should avoid using it to fetch highly sensitive endpoints if you don't trust the proxy provider. However, standard AI API Keys (like OpenAI or Claude) configured in SillyTavern's core settings are usually routed through the backend or local Rust endpoints (in TauriTavern) and will **not** be intercepted by this proxy.
