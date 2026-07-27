@@ -74,14 +74,14 @@
                     }
 
                     // Tiến hành đánh chặn
-                    let proxiedUrl = activeProxy + encodeURIComponent(url);
+                    let proxiedUrl;
                     
-                    if (activeProxy.includes('allorigins.win')) {
-                        if (!activeProxy.endsWith('url=')) {
-                            proxiedUrl = activeProxy + (activeProxy.includes('?') ? '&url=' : '?url=') + encodeURIComponent(url);
-                        } else {
-                            proxiedUrl = activeProxy + encodeURIComponent(url);
-                        }
+                    if (activeProxy.includes('cors-anywhere')) {
+                        // Dòng cors-anywhere không chấp nhận URL bị mã hóa, nó cần URL gốc ghép vào
+                        proxiedUrl = activeProxy + url;
+                    } else {
+                        // corsproxy.io và các proxy khác dùng tham số (hoặc đường dẫn) cần mã hóa an toàn
+                        proxiedUrl = activeProxy + encodeURIComponent(url);
                     }
                     
                     addLog('ĐÃ BẺ LÁI', url);
@@ -147,7 +147,6 @@
                             <select id="st-tauri-cors-preset-select" class="text_pole" style="width: 100%; padding: 5px; cursor: pointer;">
                                 <option value="">-- Chọn Proxy cài sẵn (Mì ăn liền) --</option>
                                 <option value="https://corsproxy.io/?">corsproxy.io (Mặc định - Chỉ Text)</option>
-                                <option value="https://api.allorigins.win/raw?url=">AllOrigins (Ngon - Đang Lỗi 522 Sập Server)</option>
                                 <option value="https://cors-anywhere.com/">cors-anywhere.com (Cộng đồng)</option>
                                 <option value="https://cors-anywhere.herokuapp.com/">cors-anywhere.herokuapp (Cần Unlock)</option>
                             </select>
