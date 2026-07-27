@@ -71,13 +71,8 @@
                             <p style="font-size: 0.9em; line-height: 1.4; color: #f8fafc; margin-bottom: 15px;">
                                 Bạn đã cài tiện ích này thông qua bảng Extensions (Frontend), nên phần lõi Server Backend chưa được kích hoạt. Bạn cần cài phần Backend vào thư mục <b>plugins</b> để vượt rào CORS.
                             </p>
-                            
-                            <div id="st-cors-proxy-auto-install-btn" class="menu_button" style="text-align: center; font-weight: bold; font-size: 1.1em; padding: 10px; background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #10b981; margin-bottom: 10px;">
-                                <i class="fa-solid fa-download"></i> TỰ ĐỘNG CÀI ĐẶT LÕI BACKEND (1-CLICK)
-                            </div>
-                            
                             <p style="font-size: 0.85em; color: #fbbf24; font-weight: bold; text-align: center;">
-                                ⚠️ SAU KHI CÀI ĐẶT THÀNH CÔNG, HÃY TẮT HẲN CỬA SỔ TERMUX/CMD VÀ KHỞI ĐỘNG LẠI SILLYTAVERN!
+                                ⚠️ HÃY COPY LỆNH BÊN DƯỚI RỒI TẮT HẲN CỬA SỔ TERMUX/CMD VÀ KHỞI ĐỘNG LẠI SILLYTAVERN!
                             </p>
                             
                             <p style="font-size: 0.85em; color: #fca5a5; font-weight: bold; text-align: center; margin-top: 5px;">
@@ -127,43 +122,8 @@
             const proxyIframe = $('#st-cors-proxy-iframe');
             const proxyRawOutput = $('#st-cors-proxy-raw');
             const proxyWarning = $('#st-cors-proxy-install-warning');
-            const autoInstallBtn = $('#st-cors-proxy-auto-install-btn');
-            const manualCmdContainer = $('#st-cors-proxy-manual-cmd');
             const copyBtn = $('#st-cors-proxy-copy-cmd');
             const cmdText = $('#st-cors-proxy-cmd-text');
-
-            // Tính năng Auto-Install bằng ST API
-            autoInstallBtn.on('click', async function() {
-                const btn = $(this);
-                btn.html('<i class="fa-solid fa-spinner fa-spin"></i> ĐANG TẢI & CÀI ĐẶT...').css('pointer-events', 'none').css('opacity', '0.7');
-                
-                try {
-                    await $.ajax({
-                        url: '/api/plugins/install',
-                        type: 'POST',
-                        data: JSON.stringify({ url: 'https://github.com/Khanhhpk/st-cors-proxy' }),
-                        contentType: 'application/json'
-                    });
-                    
-                    btn.html('<i class="fa-solid fa-check"></i> CÀI ĐẶT THÀNH CÔNG! HÃY RESTART ST');
-                    btn.css({
-                        'background': 'rgba(16, 185, 129, 0.4)',
-                        'border-color': '#059669',
-                        'color': 'white'
-                    });
-                    alert("CÀI ĐẶT BACKEND THÀNH CÔNG!\n\nTiện ích đã được ST tự động cài vào thư mục plugins.\nBây giờ bạn HÃY TẮT HOÀN TOÀN SillyTavern (tắt Termux/CMD) và BẬT LẠI để áp dụng.");
-                } catch (err) {
-                    console.error('[ST CORS Proxy] Lỗi cài đặt plugin:', err);
-                    btn.html('<i class="fa-solid fa-xmark"></i> CÀI ĐẶT THẤT BẠI (API BỊ CHẶN)');
-                    btn.css({
-                        'background': 'rgba(239, 68, 68, 0.4)',
-                        'border-color': '#ef4444',
-                        'color': 'white'
-                    });
-                    // Hiển thị khung copy lệnh thủ công
-                    manualCmdContainer.show();
-                }
-            });
 
             copyBtn.on('click', () => {
                 navigator.clipboard.writeText(cmdText.text());
