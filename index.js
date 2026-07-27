@@ -171,6 +171,19 @@ api.anthropic.com">${currentBlacklist}</textarea>
 
                         <div style="font-weight: bold; margin-bottom: 5px;">📜 Nhật ký Can thiệp (Logs)</div>
                         <textarea id="st-tauri-cors-logs" class="text_pole" style="width: 100%; height: 120px; font-family: monospace; font-size: 0.8em; resize: vertical; background: rgba(0,0,0,0.3);" readonly placeholder="Chưa có kết nối nào bị đánh chặn..."></textarea>
+
+                        <hr style="border-color: rgba(255,255,255,0.1); margin: 15px 0;">
+                        
+                        <div style="font-weight: bold; margin-bottom: 5px;">🧪 Kiểm tra (Test Bypass)</div>
+                        <div class="flex-container margin-bot-10px">
+                            <input type="text" id="st-tauri-cors-url" class="text_pole" style="flex: 1;" placeholder="https://example.com" value="https://example.com">
+                            <div id="st-tauri-cors-test-btn" class="menu_button" style="white-space: nowrap;">Test Fetch</div>
+                        </div>
+
+                        <div style="margin-top: 10px;">
+                            <div style="font-weight: bold; margin-bottom: 5px; font-size: 0.9em;">Mã nguồn trả về:</div>
+                            <textarea id="st-tauri-cors-raw" class="text_pole" style="width: 100%; height: 150px; font-family: monospace; font-size: 0.85em; resize: vertical; display: none;" readonly></textarea>
+                        </div>
                     </div>
                 </div>
             </div>`;
@@ -228,6 +241,30 @@ api.anthropic.com">${currentBlacklist}</textarea>
                 blacklistTimeout = setTimeout(() => {
                     localStorage.setItem(SETTINGS_BLACKLIST_KEY, blacklistInput.val());
                 }, 500);
+            });
+
+            // Test Fetch Logic
+            const testBtn = $('#st-tauri-cors-test-btn');
+            const testInput = $('#st-tauri-cors-url');
+            const testRawOutput = $('#st-tauri-cors-raw');
+
+            testBtn.on('click', async () => {
+                let url = testInput.val().trim();
+                if (!url) return;
+                if (!url.startsWith('http')) url = 'https://' + url;
+
+                testBtn.text('Đang tải...').css('pointer-events', 'none').css('opacity', '0.5');
+                testRawOutput.hide();
+
+                try {
+                    const res = await fetch(url, { method: "GET" });
+                    const text = await res.text();
+                    testRawOutput.val(text).show();
+                } catch (e) {
+                    testRawOutput.val(`❌ Lỗi: ${e.message}`).show();
+                } finally {
+                    testBtn.text('Test Fetch').css('pointer-events', 'auto').css('opacity', '1');
+                }
             });
 
         } catch (error) {
