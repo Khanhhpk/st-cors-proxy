@@ -1,8 +1,0 @@
-{
-  "name": "st-cors-proxy",
-  "version": "1.0.0",
-  "description": "SillyTavern internal CORS proxy plugin",
-  "main": "server.js",
-  "author": "Kaiz",
-  "license": "MIT"
-}
