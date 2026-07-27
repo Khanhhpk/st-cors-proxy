@@ -1,35 +1,25 @@
-# ST CORS Proxy
+# ST Tauri CORS Bypass
 
-Một SillyTavern Extension cung cấp cơ chế Bypass CORS bằng cách sử dụng Backend Proxy của ST. 
-Được thiết kế đặc biệt tối ưu cho người dùng Mobile (Termux) và Tauri Tavern.
+**A specialized frontend extension for SillyTavern designed exclusively for Tauri Tavern.**
 
-## Tại sao cần nó?
-Trình duyệt trên điện thoại hoặc WebView của Tauri không thể cài các Extension Chrome như "Allow CORS". Điều này khiến các kịch bản gọi API từ bên ngoài (như TTS, Ảnh, hay dữ liệu API web) bị chặn hoàn toàn bởi lỗi CORS đỏ rực trong Console.
-Tiện ích này giải quyết điều đó bằng cách nhờ Node.js Server của ST (bản thân Node.js không bị vướng CORS) đi lấy dữ liệu giùm và gửi lại về màn hình.
+This extension monkey-patches the global `window.fetch` function to seamlessly route all external API requests through Tauri's native Rust HTTP client (`window.__TAURI__.http`). 
 
-## ⚠️ BẮT BUỘC ĐỌC KHI CÀI ĐẶT
-1. Tải và cài đặt Extension này qua link Github trên SillyTavern.
-2. **CỰC KỲ QUAN TRỌNG:** Bạn **BẮT BUỘC PHẢI TẮT HẲN ST VÀ KHỞI ĐỘNG LẠI** (Tắt cửa sổ Termux/CMD rồi chạy lại).
-Nếu chỉ nhấn F5 (Tải lại trang), phần backend server sẽ không được nhận diện, và bạn sẽ gặp lỗi `404 Not Found`.
+By intercepting requests at the frontend layer and utilizing Tauri's native capabilities, this extension completely bypasses browser CORS restrictions without requiring any Node.js backend modifications, server plugins, or `config.yaml` edits.
 
-## Dành cho Developer
-Sau khi cài tiện ích này, trong bất kỳ code của extension nào khác, bạn hãy thay hàm `fetch` thường bằng `window.fetchWithoutCors`.
+## Features
+- **100% Client-Side:** No server plugin installation required.
+- **Global Interception:** Automatically intercepts and proxies any `fetch` calls made by SillyTavern or other extensions.
+- **Zero Configuration:** Just install and reload. It works silently in the background.
+- **Localhost Safe:** Automatically ignores internal API calls (localhost / 127.0.0.1) to ensure optimal performance.
 
-```javascript
-// Code Cũ (Bị chặn CORS):
-// const res = await fetch("https://api.vidu.com/data");
+## Installation
+1. Open SillyTavern and navigate to the **Extensions** menu (the puzzle piece icon).
+2. Click **Install Extension** and paste this repository URL:
+   `https://github.com/Khanhhpk/st-cors-proxy`
+3. Reload SillyTavern.
 
-// Code Mới (Bypass thành công):
-const res = await window.fetchWithoutCors("https://api.vidu.com/data", {
-    method: "GET",
-    headers: {
-        "Authorization": "Bearer XXX"
-    }
-});
+## How it works
+When installed in Tauri Tavern, the extension detects the presence of `window.__TAURI__.http.fetch`. It overwrites the standard browser `fetch` API. Any outgoing request to an external domain is caught, translated into Tauri's fetch format, sent via the Rust backend (which ignores CORS), and repackaged back into a standard Web API `Response` object for SillyTavern to consume transparently.
 
-const data = await res.json(); // Hoặc res.text()
-console.log(data);
-```
-
-## Tính năng kỹ thuật
-- **Zero Dependencies:** Code viết 100% bằng API nguyên bản (`native fetch`), người dùng không bao giờ cần phải gõ lệnh `npm install` bên ngoài, cài là ăn ngay.
+## Requirements
+- **Tauri Tavern**: This extension will **NOT** work on standard web browsers (Chrome, Firefox, Safari) or Termux because they lack the `window.__TAURI__` environment. If you are using a standard browser, please use a browser-based CORS extension (like "Allow CORS: Access-Control-Allow-Origin") or Quetta browser.

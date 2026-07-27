@@ -6,5 +6,5 @@
     "optional": [],
     "version": "1.0.0",
     "author": "Kaiz",
-    "description": "An internal proxy that bypasses CORS using SillyTavern's backend Node.js. (Mobile/Termux friendly)"
+    "description": "A frontend extension exclusively for Tauri Tavern that globally intercepts and routes window.fetch through Tauri's native HTTP API to seamlessly bypass CORS."
 }
